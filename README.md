@@ -1,0 +1,1 @@
+Portions of this code are adapted from [NBA Monte Carlo](https://github.com/matsonj/nba-monte-carlo).
