@@ -1,6 +1,7 @@
 from {{ ref("nba_results_log") }}
 select
     game_id,
+    game_date,
     'home' as team_type,
     hmtm as team,
     home_team as team_long,
@@ -12,6 +13,7 @@ union all
 from {{ ref("nba_results_log") }}
 select
     game_id,
+    game_date,
     'visitor' as team_type,
     vstm as team,
     visiting_team as team_long,
