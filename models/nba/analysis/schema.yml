@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: nba_team_stats
+    description: Aggregated statistics for NBA teams including win streaks
+    columns:
+      - name: max_win_streak
+        description: The longest win streak for each team in a given season
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"  # Ensures the streak is always greater than or equal to 0
+          - accepted_values:
+              values: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33]  # Based on historical NBA data, no team has ever had a streak longer than 33 games (1971-72 Lakers)
