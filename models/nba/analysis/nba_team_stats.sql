@@ -1,6 +1,56 @@
 {{ config(materialized="table") }}
 
 with
+    cte_team_games as (
+        select
+            date,
+            season,
+            team1 as team,
+            case when score1 > score2 then 1 else 0 end as is_win,
+            playoff
+        from {{ ref("nba_elo_history") }}
+        where playoff = 'r'
+        union all
+        select
+            date,
+            season,
+            team2 as team,
+            case when score2 > score1 then 1 else 0 end as is_win,
+            playoff
+        from {{ ref("nba_elo_history") }}
+        where playoff = 'r'
+    ),
+    cte_streaks as (
+        select
+            team,
+            season,
+            is_win,
+            date,
+            sum(case when is_win = 1 then 0 else 1 end) over (
+                partition by team, season
+                order by date
+                rows unbounded preceding
+            ) as streak_group
+        from cte_team_games
+    ),
+    cte_win_streaks as (
+        select
+            team,
+            season,
+            streak_group,
+            count(*) as streak_length
+        from cte_streaks
+        where is_win = 1
+        group by team, season, streak_group
+    ),
+    cte_max_streaks as (
+        select
+            team,
+            season,
+            max(streak_length) as max_win_streak
+        from cte_win_streaks
+        group by team, season
+    ),
     cte_games as (
         select
             team1,
@@ -46,6 +96,8 @@ select
     avg(elo) as avg_elo,
     max(elo) as max_elo,
     team as team,
-    season as season
+    season as season,
+    coalesce(ms.max_win_streak, 0) as max_win_streak
 from cte_games
+left join cte_max_streaks ms using (team, season)
 group by all
