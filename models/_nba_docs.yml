@@ -35,9 +35,6 @@ models:
       - name: visiting_team_score
         tests:
           - not_null
-#      - name: date
-#        tests:
-#          - not_null
       - name: winning_team
         tests:
           - not_null
@@ -84,8 +81,6 @@ models:
         tests:
           - not_null
   - name: nba_post_season_schedule
- #   tests:
- #     - empty_table
   - name: nba_reg_season_schedule
     tests:
       - empty_table
@@ -120,3 +115,27 @@ models:
       - name: seed
         tests:
           - not_null
+
+  - name: nba_team_stats
+    description: Comprehensive statistics for each NBA team including wins, losses, and performance metrics
+    columns:
+      - name: team
+        description: The team's abbreviated name code
+        tests:
+          - not_null
+      - name: season
+        description: The NBA season
+        tests:
+          - not_null
+      - name: max_win_streak
+        description: The longest winning streak achieved by the team throughout the entire season, including both regular season and playoff games. A streak continues across the regular season to playoffs transition if applicable.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: '>= 0'
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - team
+            - season
+          name: unique_team_season  # Ensures one row per team per season
