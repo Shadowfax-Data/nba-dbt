@@ -1,0 +1,7 @@
+version: 2
+
+data_tests:
+  - name: assert_nba_team_stats_max_win_streak_non_negative
+    description: >
+      Ensures that the max_win_streak column in nba_team_stats is always greater than
+      or equal to 0, as it's impossible to have a negative win streak.
