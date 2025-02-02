@@ -120,3 +120,11 @@ models:
       - name: seed
         tests:
           - not_null
+
+  - name: nba_team_stats
+    description: Aggregated team statistics by season including wins, losses, and performance metrics
+    columns:
+      - name: max_win_streak
+        description: The longest winning streak achieved by the team during the regular season
+        tests:
+          - not_null

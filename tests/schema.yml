@@ -1,0 +1,7 @@
+version: 2
+
+data_tests:
+  - name: assert_nba_team_stats_max_win_streak_non_negative
+    description: >
+      The max_win_streak column in nba_team_stats should always be greater than or equal to 0,
+      as it represents the longest winning streak achieved by a team in a season.
