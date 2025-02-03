@@ -120,3 +120,25 @@ models:
       - name: seed
         tests:
           - not_null
+
+  - name: nba_team_stats
+    description: Aggregated team statistics per season including win streaks, wins, losses, and ELO ratings
+    columns:
+      - name: max_win_streak
+        description: >
+          The longest winning streak achieved by the team during the regular season.
+          A streak is defined as consecutive wins without any losses in between.
+          Only regular season games (playoff = 'r') are considered.
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0  # Win streaks cannot be negative
+              inclusive: true
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: integer  # Ensure max_win_streak is an integer
+
+data_tests:
+  - name: assert_max_win_streak_less_than_total_wins
+    description: >
+      Verifies that a team's maximum win streak in a season cannot be greater than
+      their total number of wins for that season.
