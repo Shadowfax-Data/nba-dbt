@@ -1,0 +1,9 @@
+version: 2
+
+data_tests:
+  - name: assert_max_win_streak_consistency
+    description: >
+      Validates that the max_win_streak values in nba_team_stats are consistent with
+      what can be calculated directly from the game results in nba_elo_history.
+      The test recalculates win streaks from the source data and compares them with
+      the reported values. Any discrepancies are returned as test failures.
