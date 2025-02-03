@@ -1,6 +1,50 @@
 {{ config(materialized="table") }}
 
 with
+    cte_games_base as (
+        select
+            team1,
+            team2,
+            score1,
+            score2,
+            playoff,
+            case when score1 > score2 then team1 else team2 end as winner,
+            case when score1 < score2 then team1 else team2 end as loser,
+            case when team1 = t.team then elo1_pre else elo2_pre end as elo,
+            case when team1 = t.team then score1 else score2 end as pf,
+            case when team1 = t.team then score2 else score1 end as pa,
+            t.team || ':' || t.season as key,
+            t.team,
+            t.season,
+            date
+        from {{ ref("nba_elo_history") }} h
+        left join
+            {{ ref("nba_season_teams") }} t
+            on (t.team = h.team1 or t.team = h.team2)
+            and h.season = t.season
+        where playoff = 'r'
+        order by date
+    ),
+    cte_win_streaks as (
+        select
+            *,
+            case when team = winner then 1 else 0 end as is_win,
+            sum(case 
+                when team = winner then 0
+                else 1
+            end) over (partition by team, season order by date) as streak_group
+        from cte_games_base
+    ),
+    cte_streak_lengths as (
+        select
+            team,
+            season,
+            streak_group,
+            count(*) filter (where is_win = 1) as streak_length
+        from cte_win_streaks
+        group by team, season, streak_group
+        having count(*) filter (where is_win = 1) > 0
+    ),
     cte_games as (
         select
             team1,
@@ -46,6 +90,7 @@ select
     avg(elo) as avg_elo,
     max(elo) as max_elo,
     team as team,
-    season as season
+    season as season,
+    coalesce((select max(streak_length) from cte_streak_lengths s where s.team = cte_games.team and s.season = cte_games.season), 0) as max_win_streak
 from cte_games
 group by all
