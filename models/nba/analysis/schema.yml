@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: nba_team_stats
+    description: Aggregated statistics for NBA teams by season, including game results, performance metrics, and streaks
+    columns:
+      - name: max_win_streak
+        description: >
+          The longest winning streak (consecutive regular season wins) achieved by the team during the season.
+          A streak is broken by any loss or by the end of the regular season.
+        tests:
+          - not_null
+          - positive_values:
+              severity: error
+          - accepted_values:
+              values: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33]
+              severity: error
+              quote: false
