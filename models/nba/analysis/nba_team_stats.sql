@@ -1,6 +1,64 @@
 {{ config(materialized="table") }}
 
 with
+    base_games as (
+        select
+            date,
+            team1,
+            team2,
+            score1,
+            score2,
+            playoff,
+            season,
+            case when score1 > score2 then team1 else team2 end as winner,
+            case when score1 < score2 then team1 else team2 end as loser
+        from {{ ref("nba_elo_history") }}
+        where playoff = 'r'
+    ),
+    team_games as (
+        select
+            date,
+            team1 as team_name,
+            season,
+            case when team1 = winner then 1 else 0 end as is_win
+        from base_games
+        union all
+        select
+            date,
+            team2 as team_name,
+            season,
+            case when team2 = winner then 1 else 0 end as is_win
+        from base_games
+    ),
+    win_streaks as (
+        select
+            team_name,
+            season,
+            sum(case 
+                when is_win = 1 then 1
+                else 0
+            end) over (
+                partition by team_name, season, streak_group
+                order by date
+                rows between unbounded preceding and current row
+            ) as streak_length
+        from (
+            select
+                *,
+                sum(case when is_win = 0 then 1 else 0 end) over (
+                    partition by team_name, season
+                    order by date
+                ) as streak_group
+            from team_games
+        )
+    ),
+    max_streaks as (
+        select
+            team_name || ':' || season as key,
+            max(streak_length) as max_win_streak
+        from win_streaks
+        group by team_name, season
+    ),
     cte_games as (
         select
             team1,
@@ -46,6 +104,8 @@ select
     avg(elo) as avg_elo,
     max(elo) as max_elo,
     team as team,
-    season as season
+    season as season,
+    coalesce(ms.max_win_streak, 0) as max_win_streak
 from cte_games
+left join max_streaks ms using (key)
 group by all
