@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: nba_team_stats
+    description: "NBA team statistics including max win streaks per season"
+    columns:
+      - name: max_win_streak
+        description: "Maximum win streak achieved by the team in the regular season"
+        tests:
+          - between_values:
+              min_value: 0
+              max_value: 82
+              inclusive: true
