@@ -1,0 +1,75 @@
+version: 2
+
+models:
+  - name: nba_team_stats
+    description: Aggregated statistics for NBA teams by season, including regular season performance metrics and ELO ratings
+    columns:
+      - name: key
+        description: Unique identifier combining team name and season (format TEAM:SEASON)
+        tests:
+          - unique
+          - not_null
+      
+      - name: max_win_streak
+        description: >
+          The longest winning streak achieved by the team during the regular season.
+          Calculated by tracking consecutive wins chronologically through the season.
+          Only includes regular season games (playoff='r').
+        tests:
+          - not_null
+          - test_win_streak_range
+      
+      - name: ct
+        description: Total number of games played by the team in the season
+      
+      - name: wins
+        description: Number of regular season wins
+      
+      - name: losses
+        description: Number of regular season losses (stored as negative numbers)
+      
+      - name: home_wins
+        description: Number of regular season wins at home
+      
+      - name: home_losses
+        description: Number of regular season losses at home (stored as negative numbers)
+      
+      - name: away_wins
+        description: Number of regular season wins on the road
+      
+      - name: away_losses
+        description: Number of regular season losses on the road (stored as negative numbers)
+      
+      - name: playoff_wins
+        description: Number of playoff wins
+      
+      - name: playoff_losses
+        description: Number of playoff losses (stored as negative numbers)
+      
+      - name: pf
+        description: Average points scored per game
+      
+      - name: pa
+        description: Average points allowed per game (stored as negative numbers)
+      
+      - name: margin
+        description: Average point differential per game (points scored - points allowed)
+      
+      - name: min_elo
+        description: Lowest ELO rating achieved during the season
+      
+      - name: avg_elo
+        description: Average ELO rating throughout the season
+      
+      - name: max_elo
+        description: Highest ELO rating achieved during the season
+      
+      - name: team
+        description: Team name/identifier
+        tests:
+          - not_null
+      
+      - name: season
+        description: NBA season identifier
+        tests:
+          - not_null
