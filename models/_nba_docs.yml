@@ -1,5 +1,11 @@
 version: 2
 
+data_tests:
+  - name: assert_nba_team_stats_win_streak_range
+    description: >
+      Verifies that max_win_streak values in nba_team_stats are between 0 and 82 (max games in regular season).
+      The test fails if any team has a win streak outside this range.
+
 models:
   - name: nba_raw_schedule
     tests:
@@ -120,3 +126,13 @@ models:
       - name: seed
         tests:
           - not_null
+
+  - name: nba_team_stats
+    description: Aggregated team statistics by season including regular season performance metrics
+    columns:
+      - name: max_win_streak
+        description: The longest winning streak achieved by the team during the regular season
+        type: integer
+        tests:
+          - not_null
+
